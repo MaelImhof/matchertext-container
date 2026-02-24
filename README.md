@@ -21,3 +21,22 @@ In order to build the MinML cli tool, you can run Makefile. Below is an overview
 | build                 | Build the CLI tool with various options                                                            |
 | build-wasm            | Builds the WASM binary used by browser-based tools and the VS Code extension.                      |
 | vscode-live-preview   | Builds the WASM and extension, then installs it to your local VS Code extensions directory.       |
+
+For quick testing using Docker:
+
+```bash
+# Clone the fork with the Dockerfile
+git clone https://github.com/MaelImhof/matchertext-container.git
+
+# Build the Docker image locally
+docker build -t minml-converter .
+
+# Use the image on the MinML file 'input.m' in the current working directory
+# - --rm means the Docker container gets deleted once done, to prevent bloat
+# - -v mounts the current working directory as a volume in the container so
+#   that the CLI has access to the file to convert
+# - /data/input.m is the name of the file. If you want to convert a file named
+#   filename.m, use /data/filename.m instead
+# - output.html is the name of the output file
+docker run --rm -v "$(pwd):/data" minml-converter /data/input.m > output.html
+```
