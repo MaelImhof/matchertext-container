@@ -38,3 +38,50 @@ docker build -t minml-converter .
 # Use the image built locally on the MinML file 'input.m' in the current working directory
 docker run --rm -v "$(pwd):/data" minml-converter /data/input.m > output.html
 ```
+
+You can simplify your life and shorten the command by adding this the following your `~/.bashrc` file (or `~/.zshrc` for Mac/Zsh users):
+
+```bash
+minml() {
+    # 1. Get the absolute path and directory of the input file
+    local input_path="$1"
+
+    if [ -z "$input_path" ]; then
+        echo "Usage: minml <file.m> [output.html]"
+        return 1
+    fi
+
+    # Determine the directory, filename, and base name
+    local absolute_dir=$(cd "$(dirname "$input_path")" && pwd)
+    local filename=$(basename "$input_path")
+    local basename="${filename%.*}"
+
+    # 2. Handle the output target
+    # If a second argument is provided, use it. 
+    # Otherwise, default to the same name with .html extension
+    local output_file="${2:-$basename.html}"
+
+    # 3. Run the container
+    # We pipe the output to the output_file
+    docker run --rm \
+        -v "$absolute_dir:/data" \
+        ghcr.io/maelimhof/minml:latest \
+        "/data/$filename" > "$output_file"
+
+    # 4. Success message
+    if [ $? -eq 0 ]; then
+        echo "Successfully transformed $filename -> $output_file"
+    else
+        echo "Error: Failed to transform the file."
+    fi
+}
+```
+
+You can then use the command seamlessly:
+
+```bash
+# Usage: minml <file.m> [output.html]
+minml input.m
+```
+
+Make sure to close the terminal and re-open a new one after modifying `~/.bashrc` otherwise your changes won't take effect.
