@@ -25,5 +25,8 @@ WORKDIR /root/
 # Copy the binary from the builder stage
 COPY --from=builder /usr/local/bin/minml /usr/local/bin/minml
 
+# Label the container with its origin
+LABEL org.opencontainers.image.source=https://github.com/MaelImhof/matchertext-container
+
 # define the entrypoint so it can be used as a CLI
 ENTRYPOINT ["minml"]
