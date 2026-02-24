@@ -23,7 +23,7 @@ For quick testing using Docker:
 # - /data/input.m is the name of the file. If you want to convert a file named
 #   filename.m, use /data/filename.m instead
 # - output.html is the name of the output file
-docker run --rm -v "$(pwd):/data" minml-converter /data/input.m > output.html
+docker run --rm -v "$(pwd):/data" ghcr.io/maelimhof/minml:latest /data/input.m > output.html
 ```
 
 If you prefer building the image locally from source:
