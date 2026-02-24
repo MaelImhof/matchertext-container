@@ -12,3 +12,22 @@ The main contents of this repository are currently:
 * [go](go): experimental Go code for parsing and converting matchertext.
 
 Build command: `go build -o minml ./go/markup/minml/cmd/`
+
+For quick testing using Docker:
+
+```bash
+# Clone the fork with the Dockerfile
+git clone https://github.com/MaelImhof/matchertext-container.git
+
+# Build the Docker image locally
+docker build -t minml-converter .
+
+# Use the image on the MinML file 'input.m' in the current working directory
+# - --rm means the Docker container gets deleted once done, to prevent bloat
+# - -v mounts the current working directory as a volume in the container so
+#   that the CLI has access to the file to convert
+# - /data/input.m is the name of the file. If you want to convert a file named
+#   filename.m, use /data/filename.m instead
+# - output.html is the name of the output file
+docker run --rm -v "$(pwd):/data" minml-converter /data/input.m > output.html
+```
