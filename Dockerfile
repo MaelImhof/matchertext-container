@@ -1,5 +1,5 @@
 # CLI is written in Go, we'll build it
-FROM golang:1.19-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -15,7 +15,7 @@ COPY . .
 
 # Build the application
 # We build the binary from the cmd/minml.go file
-RUN CGO_ENABLED=0 GOOS=linux go build -o /usr/local/bin/minml ./go/markup/minml/cmd/minml.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /usr/local/bin/minml ./go/markup/minml/cmd/
 
 # Final stage
 FROM alpine:latest
