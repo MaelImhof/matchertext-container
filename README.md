@@ -1,34 +1,59 @@
-This repository contains a draft paper and experimental code
-related to matchertext, a syntactic discipline that allows
-strings in one compliant language to be embedded verbatim without escaping
-(e.g., via cut-and-paste) into itself or another compliant language.
+# MinML CLI Wrapper
 
-For an overview of the matchertext idea please see
-[the matchertext paper](https://bford.info/pub/lang/matchertext/).
+This fork wraps the main MinML CLI into a containerized setup so that installing Go 1.24 on the host is not required, preventing version conflicts and simplifying setup.
 
-The main contents of this repository are currently:
-
-* [doc](doc): the LaTeX source for the in-progress matchertext paper.
-* [go](go): experimental Go code for parsing and converting matchertext.
-
-Build command: `go build -o minml ./go/markup/minml/cmd/`
-
-For quick testing using Docker:
+A **convenience script** is also provided to use the CLI seamlessly from the terminal:
 
 ```bash
-# Pulls the pre-built image from GitHub Registry and runs it locally to
-# convert a file in the current working directory.
-#
-# - --rm means the Docker container gets deleted once done, to prevent bloat
-# - -v mounts the current working directory as a volume in the container so
-#   that the CLI has access to the file to convert
-# - /data/input.m is the name of the file. If you want to convert a file named
-#   filename.m, use /data/filename.m instead
-# - output.html is the name of the output file
-docker run --rm -v "$(pwd):/data" ghcr.io/maelimhof/minml:latest /data/input.m > output.html
+# Convert the file input.m and write the HTML to output.html
+minml input.m > output.html
+
+# Watch the file input.m and serve it in the browser at URL
+# http://localhost:8080, refresh the page each time the file is modified
+minml server input.m
 ```
 
-If you prefer building the image locally from source:
+## Installation
+
+> [!WARNING]
+> Windows is not natively supported. The convenience script relies on Bash/Zsh.
+> To use the containerized version of the MinML CLI on Windows, please use WSL (Windows Subsystem for Linux).
+
+> [!IMPORTANT]
+> Because the whole point of this fork is to wrap the MinML CLI inside a container, some container software should be installed, such as **Podman** or **Docker**. The documentation and script assume Docker.
+
+The simplest way to use this CLI wrapper is by adding the provided `minml.sh` script to your shell environment. This works natively on Linux and macOS.
+
+1. The [`minml.sh`](https://github.com/MaelImhof/matchertext-container/blob/container/minml.sh) file at the root of this repository defines the `minml()` bash function. Copy and paste this function into `~/.bashrc` (or `~/.zshrc` if you are on macOS).
+
+2. Close your terminal and open a new one for the modification to take effect.
+
+3. Run the command without arguments to see if the setup works as expected:
+
+    ```bash
+    minml
+    ```
+
+    If this prints the help for the `minml` executable, then you're all set! Refer to the help command (`minml help`) or to the [examples section](#examples) to get started.
+
+4. To update the script later on, simply remove the old version from your `~/.bashrc` or `~/.zshrc` file and paste the new one in.
+
+### Using the raw container image
+
+If you do not want to install a script, or you want to test the container before installing it, use Docker or Podman directly to run the container:
+
+```bash
+docker run --rm \
+    -v "$(pwd):/data" \
+    -w /data \
+    --user "$(id -u):$(id -g)" \
+    ghcr.io/maelimhof/minml:latest \
+    input.m > output.html
+```
+
+### Building the image from source
+
+Want to build the image yourself?
 
 ```bash
 # Clone the fork with the Dockerfile
@@ -38,52 +63,51 @@ git clone https://github.com/MaelImhof/matchertext-container.git
 docker build -t minml-converter .
 
 # Use the image built locally on the MinML file 'input.m' in the current working directory
-docker run --rm -v "$(pwd):/data" minml-converter /data/input.m > output.html
+docker run --rm \
+    -v "$(pwd):/data" \
+    -w /data \
+    --user "$(id -u):$(id -g)" \
+    minml-converter \
+    input.m > output.html
 ```
 
-You can simplify your life and shorten the command by adding this the following your `~/.bashrc` file (or `~/.zshrc` for Mac/Zsh users):
+## Examples
+
+Here are some examples of commands with what they do:
 
 ```bash
-minml() {
-    # 1. Get the absolute path and directory of the input file
-    local input_path="$1"
-
-    if [ -z "$input_path" ]; then
-        echo "Usage: minml <file.m> [output.html]"
-        return 1
-    fi
-
-    # Determine the directory, filename, and base name
-    local absolute_dir=$(cd "$(dirname "$input_path")" && pwd)
-    local filename=$(basename "$input_path")
-    local basename="${filename%.*}"
-
-    # 2. Handle the output target
-    # If a second argument is provided, use it. 
-    # Otherwise, default to the same name with .html extension
-    local output_file="${2:-$basename.html}"
-
-    # 3. Run the container
-    # We pipe the output to the output_file
-    docker run --rm \
-        -v "$absolute_dir:/data" \
-        ghcr.io/maelimhof/minml:latest \
-        "/data/$filename" > "$output_file"
-
-    # 4. Success message
-    if [ $? -eq 0 ]; then
-        echo "Successfully transformed $filename -> $output_file"
-    else
-        echo "Error: Failed to transform the file."
-    fi
-}
-```
-
-You can then use the command seamlessly:
-
-```bash
-# Usage: minml <file.m> [output.html]
+# Convert a MinML file into HTML and print the HTML inside the terminal
+# input.m can be any filename in the current directory
+# By default, the CLI will print the output to the terminal
 minml input.m
+
+# Equivalent to the command above
+# If you do not provide a command, as above, MinML CLI will default to
+# the convert command, thus this version is simply more verbose
+minml convert input.m
+
+# Convert a MinML file into HTML and save the HTML to output.html
+# output.html can be replaced by another filename
+minml input.m > output.html
+
+# Start a server on localhost:9000 and watch the file input.m
+# When the file is modified, the page in the browser will be refreshed
+# automatically, allowing for excellent UX
+# If no port is specified, 8080 is the default
+minml server input.m --port 9000
+
+# Get a complete description of the existing options from both the CLI
+# and the wrapper.
+minml help
+
+# Update the wrapper image (docker pull)
+minml --update-image
 ```
 
-Make sure to close the terminal and re-open a new one after modifying `~/.bashrc` otherwise your changes won't take effect.
+Refer to the complete description of existing options provided by the CLI and the wrapper to learn more about more advanced or niche features.
+
+## Useful links
+
+- [`dedis/matchertext` (upstream project)](https://github.com/dedis/matchertext)
+- [The matchertext paper](https://bford.info/pub/lang/matchertext/)
+- [An introduction to MinML](https://bford.info/2022/12/28/minml/)
