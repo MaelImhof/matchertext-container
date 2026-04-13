@@ -112,6 +112,15 @@ minml --update-image
 
 Refer to the complete description of existing options provided by the CLI and the wrapper to learn more about more advanced or niche features.
 
+## VSCode Live Preview Extension
+
+The upstream repository also provides a VSCode extension for live previewing MinML files. This extension is made available as a pre-built artifact in [GitHub Actions](https://github.com/MaelImhof/matchertext-container/actions/workflows/vscode-extension.yml).
+
+1. Navigate to the [VSCode extension workflow](https://github.com/MaelImhof/matchertext-container/actions/workflows/vscode-extension.yml)
+1. Click on the latest successful run
+1. Scroll down to the "Artifacts" section and download the `minml-vscode-extension` artifact
+1. Install the downloaded `.vsix` file in VSCode (Extensions > Install from VSIX)
+
 ## Useful links
 
 - [`dedis/matchertext` (upstream project)](https://github.com/dedis/matchertext)
