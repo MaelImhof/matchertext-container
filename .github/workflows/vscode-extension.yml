@@ -48,11 +48,11 @@ jobs:
 
       - name: Package extension
         working-directory: dev/vscode/minml-preview
-        run: vsce package --allow-missing-repository --out ../..
+        run: vsce package --allow-missing-repository -o ../../minml-preview.vsix
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: minml-vscode-extension
-          path: dev.vsix
+          path: dev/minml-preview.vsix
           retention-days: 30
