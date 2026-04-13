@@ -1,0 +1,58 @@
+name: Build VSCode Extension
+
+# Configures this workflow to run every time a change is pushed to the branch called `main`.
+# Only certain paths are monitored for changes, so that the workflow only runs when relevant
+# files are modified. The `workflow_dispatch` event allows the workflow to be triggered
+# manually from the GitHub UI.
+on:
+  push:
+    branches: [container]
+    paths:
+      - 'dev/vscode/**'
+      - 'go/wasm/**'
+      - '.github/workflows/vscode-extension.yml'
+  workflow_dispatch:
+
+jobs:
+  build-extension:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build WASM
+        run: make build-wasm
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: dev/vscode/minml-preview
+        run: npm install
+
+      - name: Compile extension
+        working-directory: dev/vscode/minml-preview
+        run: npm run compile
+
+      - name: Install vsce
+        working-directory: dev/vscode/minml-preview
+        run: npm install -g @vscode/vsce
+
+      - name: Package extension
+        working-directory: dev/vscode/minml-preview
+        run: vsce package --allow-missing-repository --out ../..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: minml-vscode-extension
+          path: dev.vsix
+          retention-days: 30
