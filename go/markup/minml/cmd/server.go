@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/dedis/matchertext/go/markup/minml"
 	"io/fs"
 	"log"
 	"net/http"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/dedis/matchertext/go/markup/minml"
 
 	"github.com/dedis/matchertext/go/markup/minml/cmd/server_structs"
 	"github.com/fsnotify/fsnotify"
